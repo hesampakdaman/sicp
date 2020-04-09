@@ -1,0 +1,22 @@
+#+OPTIONS: toc:nil
+
+\noindent\textbf{Exercise 1.19}: Taking successive applications of $T_{pq}$ gives us
+\begin{align*}
+        T^2_{pq} &= T_{pq}\bigl(T_{pq}(a,b)\bigr) = T_{pq}\bigl(bq + aq + ap, bp + aq\bigr) \\
+                 &= \Bigl((bp + aq)q + (bq + aq + ap)q + (bq + aq + ap)p, (bp + aq)p + (bq + aq + ap)q\Bigr).
+\end{align*}
+Now consider the second value in the tuple, we have that
+\begin{align*}
+        (bp + aq)q + (bq + aq + ap)q = b(p^2 + q^2) + a(2pq + q^2),
+\end{align*}
+which gives us $p' = (p^2 + q^2)$ and $q' = (q^2 + 2pq)$. Then
+\begin{align*}
+        bq' + aq' + ap' &= b(q^2 + 2pq) + a(q^2 + 2pq) + a(p^2 + q^2) \\
+                        &= bq^2 + 2bpq + aq^2 + 2apq + ap^2 + aq^2 = \\
+                        &= (bp + aq)q + (bq + aq + ap)q + (bq + aq + ap)p,
+\end{align*}
+which is the first value in the tuple. Thus,
+\begin{align*}
+        T^2_{pq}(a,b) &= \bigl(bq' + aq' + ap', bp' + aq'\bigr).
+\end{align*}
+\hfill$\square$
