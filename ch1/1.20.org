@@ -1,0 +1,48 @@
+Let =gcd= be defined as
+#+BEGIN_SRC scheme
+  (define (gcd a b)
+    (if (= b 0)
+        a
+        (gcd b (remainder a b))))
+#+END_SRC
+Normal-order evaluation will expand the operand until all expressions
+are primitive. Here we assume =if= has a special form where the test is
+evaluated then, depending on the answer, either the predicate or
+consequent is evaluated next. This yields the following process, where
+r_k is the k:th remainder and an asterix indicates the interperter evaluated it:
+#+BEGIN_SRC scheme
+  (if (= 40 0)
+      206
+      (if (= r1* 0)
+          40
+          (if (= r2* 0)
+              r1
+              (if (= r3* 0)
+                  r2
+                  (if (= r4* 0)
+                      r3*
+                      (gcd r4 r5))))))
+
+  r1 = (remainder 206 40)			; 1 call
+  r2 = (remainder 40 (remainder 206 40))	; 2 calls
+  r3 = (remainder r2 r1) = (remainder (remainder 40 (remainder 206 40)) (remainder 206 40)) ;4 calls
+  r4 = (remainder r3 r2) = (remainder
+                            (remainder (remainder 40 (remainder 206 40)) (remainder 206 40))
+                            (remainder 40 (remainder 206 40))) ;7 calls
+
+  ;; We see a pattern above. If f(r_k) is the number of calls to
+  ;; (remainder n) to calculate r_k for k > 0, then f(r_{k+2}) =
+  ;; f(r_{k+1}) + f(r_{k}) + 1, where f(r_1) = 1 and f(r_2) = 2.
+#+END_SRC
+In normal-order evaluation the remainders in the test are all
+calculated due to the special form of =if=. Lastly, r3 in predicate must
+be evaluated again, since it was not evaluated in the penultimate call
+=(gcd r3 r4)=. This gives us a total of 18 calls to =(remainder n)= (r1,
+r2, r3, r4 and r3 again).
+
+In applicative-order evaluation the operand and its operands are
+evaluated before applying the procedure. This means that wherever we
+encounter any call to =(remainder n)= as an argument to =(gcd a b)= we
+will evaluate it before applying operand. Since there are 4 remainders
+to calculate in =(gcd 206 40)= and they will appear first as an argument
+to =(gcd a b)=, this means that we have 4 calls to =(remainder n)=.
