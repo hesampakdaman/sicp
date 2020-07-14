@@ -1,0 +1,59 @@
+% Created 2020-07-09 Thu 18:59
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.3 (Org mode 9.1.9)}, 
+ pdflang={English}}
+\begin{document}
+
+\noindent\textbf{Exercise 1.13}: First we show that \(\mathrm{Fib}(n) = ({\varphi^n - \psi^n})/\sqrt{5}\) using induction. It is clear that
+\(\mathrm{Fib}(1) = (\varphi-\psi)/\sqrt{5} = 1\). Now we show that this holds for \(k+1\)
+\begin{align*}
+        \mathrm{Fib}(k+1) &= \mathrm{Fib}(k) + \mathrm{Fib}(k-1)
+        = \frac{\varphi^{k} - \psi^{k}}{\sqrt{5}} + \frac{\varphi^{k-1} - \psi^{k-1}}{\sqrt{5}}     \\
+        &= \frac{ (\varphi+1)\varphi^{k-1} - (\psi+1)\psi^{k-1} }{ \sqrt{5} }
+        = \frac{ \varphi^2\varphi^{k-1} - \psi^2\psi^{k-1} }{ \sqrt{5} } \\
+        &= \frac{ \varphi^{k+1} - \psi^{k+1} }{ \sqrt{5} },
+\end{align*}
+where used the fact that both \(\varphi\) and \(\psi\) satisfy \(x^2=x+1\). Using the result above,
+we get that
+\begin{align*}
+        \Bigl| \frac{ \varphi^n } {\sqrt{5}} - \mathrm{ Fib }(n) \Bigr| &=
+        \Bigl| \frac{ \psi^n } {\sqrt{5}} \Bigr| =
+        \Bigl| \frac{ (1-\sqrt{5})^n } {2^n\sqrt{5}} \Bigr| <
+        \frac{1}{2} \cdot \Bigl| {\frac{ 1-\sqrt{5} } {2}} \Bigr|^n
+        < \frac{1}{2} \cdot \Bigl| {\frac{ 1-3 } {2}} \Bigr|^n \\
+        & \leq \frac{1}{2}.
+\end{align*}
+Suppose there exists another integer \(m\) that is closer to \(\varphi^n / \sqrt{5}\). Then
+\begin{align*}
+        \Bigl| \mathrm{Fib}(n) - m \Bigr| &= \Bigl| \mathrm{Fib}(n) - \frac{ \varphi^n } {\sqrt{5}}
+        + \frac{ \varphi^n } {\sqrt{5}} - m \Bigr| \\
+        & \leq \Bigl| \mathrm{Fib}(n) - \frac{ \varphi^n } {\sqrt{5}} \Bigr|
+        + \Bigl| \frac{ \varphi^n } {\sqrt{5}} - m \Bigr| \\
+        & < \frac{1}{2} + \frac{1}{2} = 1,
+\end{align*}
+which is a contradiction. Since \(\mathrm{Fib}(n) \neq m\) and both are integers their difference
+must be strictly greater than \(1\).
+
+\hfill\(\square\)
+\end{document}
