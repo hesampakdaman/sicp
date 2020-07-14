@@ -1,0 +1,39 @@
+% Created 2020-07-09 Thu 18:59
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\date{\today}
+\title{}
+\hypersetup{
+ pdfauthor={},
+ pdftitle={},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.3 (Org mode 9.1.9)}, 
+ pdflang={English}}
+\begin{document}
+
+\noindent\textbf{Exercise 1.35}: We show that the golden ratio $\varphi$ is a fixed point to $x \mapsto 1 + 1/x$.
+If $\varphi$ is a fixed point, then successive function applications should not alter the value.
+Let $f(x) = 1 + 1/x$, then
+\begin{align*}
+  f(\varphi) = 1 + \frac{1}{\varphi} = \frac{\varphi + 1}{\varphi} = \frac{\varphi^2}{\varphi} = \varphi,
+\end{align*}
+where we have used the fact $\varphi^2 = \varphi + 1$.
+Clearly, applying $f$ again will result in the same value.
+
+\hfill$\square$
+
+\end{document}
