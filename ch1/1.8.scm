@@ -2,20 +2,17 @@
   (* x x))
 
 (define (cube x)
-  (* x x x))
-
-(define (sum-div x y z)
-  (/ (+ x y) z))
+  (* (square x) x))
 
 (define (improve guess x)
-  (sum-div (/ x (square guess)) (* 2 guess) 3))
+  (/ (+ (/ x (square guess)) (* 2 guess)) 3))
 
 (define (good-enough? guess x)
   (< (abs (- (cube guess) x)) 0.001))
 
-(define (sqrt-iter guess x)
+(define (cube-root-iter guess x)
   (if (good-enough? guess x)
       guess
-      (sqrt-iter (improve guess x) x)))
+      (cube-root-iter (improve guess x) x)))
 
-(define (sqrt x) (sqrt-iter 1.0 x))
+(define (cube-root x) (cube-root-iter 1.0 x))
