@@ -19,6 +19,3 @@
       (sqrt-iter (improve guess x) x)))
 
 (define (sqrt x) (sqrt-iter 1.0 x))
-
-(display (sqrt-iter 4.1 64.0))
-(display "\n")
