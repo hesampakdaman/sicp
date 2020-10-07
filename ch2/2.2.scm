@@ -7,10 +7,11 @@
 (define (end-segment s) (cdr s))
 
 (define (midpoint-segment s)
+  (define (average x y) (/ (+ x y) 2))
   (let ((p (start-segment s))
 	(q (end-segment s)))
-    (make-point (/ (+ (x-point p) (x-point q)) 2)
-		(/ (+ (y-point p) (y-point q)) 2))))
+    (make-point (average (x-point p) (x-point q))
+		(average (y-point p) (y-point q)))))
 
 (define (print-point p)
   (display "(")
