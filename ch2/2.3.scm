@@ -40,4 +40,4 @@
 (define (area-rect r)
   (* (width-rect r) (height-rect r)))
 (define (perimeter-rect r)
-  (+ (* 2 (width-rect r)) (* 2 (height-rect r))))
+  (* 2 (+ (width-rect r) (height-rect r))))
