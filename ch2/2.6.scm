@@ -37,3 +37,8 @@
 ;; We can test (add m n) with (add two one) and expect it to behave as
 ;; (add-1 two).
 (define three (add two one))
+
+;; If we let f be the increment function and x = 0, then
+;; ((three increment) 0) will return 3.
+(define (inc x) (+ x 1))
+((three inc) 0)				; outputs 3.
