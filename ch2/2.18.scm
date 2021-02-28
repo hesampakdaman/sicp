@@ -3,8 +3,8 @@
 ;; of the answer list. Return the answer list when no more items
 ;; exists.
 (define (reverse items)
-  (define (reverse-iter answer residual)
-    (if (null? residual)
+  (define (iter answer things)
+    (if (null? things)
 	answer
-	(reverse-iter (cons (car residual) answer) (cdr residual))))
-  (reverse-iter (list (car items)) (cdr items)))
+	(iter (cons (car things) answer) (cdr things))))
+  (iter #nil items))
