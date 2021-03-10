@@ -6,7 +6,7 @@
 ;; subsets of S = {subsets of T with x0 added to them} u {x0} u {empty set}
 (define (subsets s)
   (if (null? s)
-      (list #nil)
+      (list '())
       (let ((rest (subsets (cdr s))))
 	(append rest (map (lambda (x) (cons (car s) x)) rest)))))
 
