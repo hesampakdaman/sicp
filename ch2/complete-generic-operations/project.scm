@@ -1,0 +1,25 @@
+(load "raise.scm")
+
+;; generic interface
+(define (project x)
+  ((get 'project (type-tag x)) (contents x)))
+(define (drop x)
+  (if (and (or (pair? x) (number? x))
+	   (get 'project (type-tag x))
+	   (equ? (raise (project x)) x))
+      (drop (project x))
+      x))
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	  (drop (apply proc (map contents args))) ; usage of drop
+	  (if (and (= (length args) 2) (not (apply eq? type-tags)))
+	      (let ((type1 (car type-tags))
+		    (type2 (cadr type-tags))
+		    (a1 (car args))
+		    (a2 (cadr args)))
+		(if (>type? type1 type2)
+		    (apply-generic op a1 (raise a2))
+		    (apply-generic op (raise a1) a2)))
+	      (error "No method for these types" (list op type-tags)))))))
