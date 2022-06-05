@@ -14,6 +14,7 @@
 (define (div x y) (apply-generic 'div x y))
 (define (greatest-common-divisor x y)
   (apply-generic 'greatest-common-divisor x y))
+(define (reduce x y) (apply-generic 'reduce x y))
 (define (equ? x y) (apply-generic 'equ? x y))
 (define (=zero? x) (apply-generic '=zero? x))
 (define (sine x) (apply-generic 'sine x))

@@ -1,9 +1,9 @@
 (define (install-rational-package)
   ;; internal procedures
   (define (numer x) (car x))
-  (define (denom x) (cdr x))
+  (define (denom x) (cadr x))
   (define (make-rat n d)
-    (cons n d))
+    (reduce n d))
   (define (add-rat x y)
     (make-rat (add (mul (numer x) (denom y))
 		 (mul (numer y) (denom x)))
