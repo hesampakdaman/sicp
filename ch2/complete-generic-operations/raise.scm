@@ -1,0 +1,28 @@
+(define (super-type type)
+  (cond ((eq? type 'scheme-number) 'rational)
+	((eq? type 'rational) 'complex)
+	(else '())))
+(define (>type? type1 type2)
+  (define (>=type? t1 t2)
+    (cond ((null? t2) false)
+	  ((eq? t1 t2) true)
+	  (else (>=type? t1 (super-type t2)))))
+  (if (eq? type1 type2)
+      false
+      (>=type? type1 (super-type type2))))
+(define (raise x)
+  ((get 'raise (type-tag x)) (contents x)))
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+	  (apply proc (map contents args))
+	  (if (and (= (length args) 2) (not (apply eq? type-tags))) ; ensures type1 != type2
+	      (let ((type1 (car type-tags))
+		    (type2 (cadr type-tags))
+		    (a1 (car args))
+		    (a2 (cadr args)))
+		(if (>type? type1 type2) ; from above either type1 > type2 or type1 < type2
+		    (apply-generic op a1 (raise a2))
+		    (apply-generic op (raise a1) a2)))
+	      (error "No method for these types" (list op type-tags)))))))
