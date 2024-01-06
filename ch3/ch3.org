@@ -395,3 +395,28 @@ The =((acc 'withdraw) 60)= call is evaluated in a similar fashion creating two n
 Finally, the call =(define acc2 (make-account 100))= sets up a new environment =E6= where =balance= is bound to \( 100 \). We see here that the two accounts are kept distinct by the fact that they have different environments. The only environment structure that shared between the two accounts is the global environment.
 [[../images/ch3/ex-3.11/make-acc2.jpg]]
 \newpage
+
+** Modeling with Mutable Data
+*** Exercise 3.12
+#+begin_quote
+Consider the interaction
+#+begin_src scheme
+(define x (list 'a 'b))
+(define y (list 'c 'd))
+(define z (append x y))
+z
+(a b c d)
+(cdr x)
+⟨response⟩
+(define w (append! x y))
+w
+(a b c d)
+(cdr x)
+⟨response⟩
+#+end_src
+What are the missing =⟨response⟩=? Draw box-and-pointer diagrams to explain your answer.
+#+end_quote
+We draw the box-and-pointer diagram for state up until defining the variable =z=. [[../images/ch3/ex-3.12/define-z.jpg]]
+In doing so we see that the the first missing ~⟨response⟩~ is =(b)=. Let's now draw the diagram after =w= is defined. We are using the mutator procedure =append!= so the list structure is modified in-place. [[../images/ch3/ex-3.12/define-w.jpg]]
+This time the missing response will be =(b c d)= since =x= was mutated when =w= was defined.
+\newpage
