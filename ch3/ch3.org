@@ -438,3 +438,27 @@ The procedure =make-cycle= will set the last pair's =cdr= of =(list 'a 'b 'c)= t
 [[../images/ch3/ex-3.13/cycle.jpg]]
 As can be seen in the diagram above, if we try to evaluate ~(last-pair z)~ we will get an infinite loop since the last pair of =z= points to itself.
 \newpage
+
+*** Exercise 3.14
+#+begin_quote
+The following procedure is quite useful, although obscure:
+#+begin_src scheme
+  (define (mystery x)
+    (define (loop x y)
+      (if (null? x)
+          y
+          (let ((temp (cdr x)))
+            (set-cdr! x y)
+            (loop temp x))))
+    (loop x '()))
+#+end_src
+Draw the box-and-pointer diagram that represents the list to which v is bound. Suppose that we now evaluate =(define w (mystery v))=. Draw box-and-pointer diagrams that show the structures =v= and =w= after evaluating this expression. What would be printed as the values of =v= and =w=?
+#+end_quote
+We can observe that the value of =x= in =loop= will always be the tail of the previous =x= value. So that =temp= would be =(a b c d)=, =(b c d)=, ..., =(d)=, =()=. The =y= is always the previous iteration's mutated =x= value beginning with the empty list =()=. Since =x= is changed by taking its head and setting its =cdr= to be =y=, the values =y= take in each iteration are =()=, =(a)=, =(b a)=, ..., =(d c b a)=. This means that =(mystery x)= is effectively reversing the list =x=.
+
+We draw the box-and-pointer diagram for =v= below.
+[[../images/ch3/ex-3.14/define-v.jpg]]
+
+After the call =(define w (mystery v))= we have reversed the list =v= and bound it to =w=. However, the first =set-cdr!= in =loop= will mutate the value pointed by =v= by setting the =cdr= to =y= which is initialized by the empty list. In the next iteration, =v= will be passed in =loop= as =y= which is not mutated and in fact dropped. This means we only mutate the value of =v= once to =(a)=. We draw the box-and-pointer diagram for =v= and =w= below.
+[[../images/ch3/ex-3.14/define-w.jpg]]
+\newpage
