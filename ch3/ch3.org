@@ -420,3 +420,21 @@ We draw the box-and-pointer diagram for state up until defining the variable =z=
 In doing so we see that the the first missing ~⟨response⟩~ is =(b)=. Let's now draw the diagram after =w= is defined. We are using the mutator procedure =append!= so the list structure is modified in-place. [[../images/ch3/ex-3.12/define-w.jpg]]
 This time the missing response will be =(b c d)= since =x= was mutated when =w= was defined.
 \newpage
+*** Exercise 3.13
+#+begin_quote
+Consider the following make-cycle procedure, which uses the =last-pair= procedure deﬁned in Exercise 3.12:
+#+begin_src scheme
+  (define (make-cycle x)
+    (set-cdr! (last-pair x) x)
+    x)
+#+end_src
+Draw a box-and-pointer diagram that shows the structure =z= created by
+#+begin_src scheme
+  (define z (make-cycle (list 'a 'b 'c)))
+#+end_src
+What happens if we try to compute ~(last-pair z)~?
+#+end_quote
+The procedure =make-cycle= will set the last pair's =cdr= of =(list 'a 'b 'c)= to the head of itself. This means that we have created a cycle over the ='(a b c)=. We draw the box-and-pointer diagram for =z= below.
+[[../images/ch3/ex-3.13/cycle.jpg]]
+As can be seen in the diagram above, if we try to evaluate ~(last-pair z)~ we will get an infinite loop since the last pair of =z= points to itself.
+\newpage
