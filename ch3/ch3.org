@@ -1,0 +1,318 @@
+#+OPTIONS: num:2
+#+STARTUP: show3levels
+#+LATEX_HEADER: \usepackage[margin=1.5in]{geometry}
+* Modularity, Objects, and State
+** Assignment and Local State
+*** Exercise 3.1
+:PROPERTIES:
+:header-args: :tangle "3.1.scm"
+:END:
+#+begin_quote
+Write a procedure ~make-accumulator~ that generates accumulators, each maintaining an independent sum. The input to ~make-accumulator~ should specify the initial value of the sum.
+#+end_quote
+\noindent We will use ~set!~ to mutate the current accumulator ~sum~. After modifying the state we simply return the current value.
+#+begin_src scheme
+  (define (make-accumulator sum)
+    (lambda (n)
+      (set! sum (+ sum n))
+      sum))
+#+end_src
+\noindent Now we can test our procedure by creating an accumulator that adds \( 5 \) to the current sum.
+#+begin_src scheme
+  (define A (make-accumulator 5))
+  (= (A 10) 15)
+  (= (A 10) 25)
+#+end_src
+\newpage
+
+*** Exercise 3.2
+:PROPERTIES:
+:header-args: :tangle "3.2.scm"
+:END:
+#+begin_quote
+Write a procedure ~make-monitored~ that takes as input a procedure, ~f~, that itself takes one input. The result returned by ~make-monitored~ is a third procedure, say ~mf~, that keeps track of the number of times it has been called by maintaining an internal counter. If the input to ~mf~ is the special symbol ~how-many-calls?~, then ~mf~ returns the value of the counter. If the input is the special symbol ~reset-count~, then ~mf~ resets the counter to zero. For any other input, ~mf~ returns the result of calling ~f~ on that input and increments the counter.
+#+end_quote
+\noindent Let ~calls~ be a state variable for ~mf~ to mutate after each time ~f~ is called. The user can pass in the special symbol ~how-many-calls?~ to ~mf~ to see how many times ~f~ has been called.
+#+begin_src scheme
+  (define (make-monitored f)
+    (let ((calls 0))
+      (define (mf arg)
+        (cond ((eq? arg 'how-many-calls?) calls)
+              ((eq? arg 'reset-count) (set! calls 0) 0)
+              (else (set! calls (+ calls 1))
+                    (f arg))))
+      mf))
+#+end_src
+\noindent We copy the test from the book to ensure our ~make-monitored~ works as expected. In addition we show that resetting the count also works as intended.
+#+begin_src scheme
+  (define s (make-monitored sqrt))
+  (s 100)
+  (= (s 'how-many-calls?) 1)
+  (s 'reset-count 0)
+  (= (s 'how-many-calls?) 0)
+#+end_src
+\newpage
+
+*** Exercise 3.3
+:PROPERTIES:
+:header-args: :tangle "3.3.scm"
+:END:
+#+begin_quote
+Modify the ~make-account~ procedure so that it creates password-protected accounts.
+#+end_quote
+Introduce a new state variable ~password~ where we store the user's password. It will be bound in the local environment from the arguments in ~make-account~. Install a new procedure ~wrong-password?~ in the dispatch that checks against it. Handle incorrect passwords by calling ~handle-incorrect-password~.
+#+begin_src scheme
+  (define (make-account balance password)
+    (define (withdraw amount)
+      (if (>= balance amount)
+          (begin (set! balance (- balance amount))
+                 balance)
+          "Insufficient funds"))
+    (define (deposit amount)
+      (begin (set! balance (+ balance amount))
+             balance))
+    (define (handle-incorrect-password x)
+      "Incorrect password")
+    (define (wrong-password? pwd)
+      (not (eq? pwd password)))
+    (define (dispatch pwd m)
+      (cond ((wrong-password? pwd) handle-incorrect-password)
+            ((eq? m 'withdraw) withdraw)
+            ((eq? m 'deposit) deposit)
+            (else (error "Unknown request: MAKE-ACCOUNT" m))))
+    dispatch)
+#+end_src
+Again the test from the book to verify our procedure.
+#+begin_src scheme
+  (define acc (make-account 100 'secret-password))
+  (= ((acc 'secret-password 'withdraw) 40) 60)
+  (string=? ((acc 'some-other-password 'deposit) 50) "Incorrect password")
+#+end_src
+\newpage
+
+*** Exercise 3.4
+:PROPERTIES:
+:header-args: :tangle "3.4.scm"
+:END:
+#+begin_quote
+Modify the make-account procedure of =Exercise 3.3= by adding another local state variable so that, if an account is accessed more than seven consecutive times with an incorrect password, it invokes the procedure ~call-the-cops~.
+#+end_quote
+The plan is to introduce a local state variable ~incorrect-attempts~ that holds the number of password attempts. We then modify ~handle-incorrect-password~ so that it increments the local state. If the number of attempts is more than \( 7 \) we simply call the cops, otherwise just output =Incorrect password= as usual.
+#+begin_src scheme
+  (define (make-account balance password)
+    (define incorrect-attempts 0)
+    (define (withdraw amount)
+      (if (>= balance amount)
+          (begin (set! balance (- balance amount))
+                 balance)
+          "Insufficient funds"))
+      (define (deposit amount)
+        (begin (set! balance (+ balance amount))
+               balance))
+    (define (signal-incorrect-password)
+      "Incorrect password")
+    (define (call-the-cops)
+      "Calling the cops")
+    (define (handle-incorrect-password x)
+      (begin (set! incorrect-attempts (+ incorrect-attempts 1))
+             (if (>= incorrect-attempts 7)
+                 (call-the-cops)
+                 (signal-incorrect-password))))
+    (define (handle-request request)
+      (set! incorrect-attempts 0)
+      (cond ((eq? request 'withdraw) withdraw)
+            ((eq? request 'deposit) deposit)
+            (else (error "Unknown request: MAKE-ACCOUNT" request))))
+    (define (wrong-password? pwd)
+      (not (eq? pwd password)))
+    (define (dispatch pwd m)
+      (if (wrong-password? pwd)
+          handle-incorrect-password
+          (handle-request m)))
+    dispatch)
+#+end_src
+As a test we create an account and provide the wrong password \( 7 \) times to see that the cops are called.
+#+begin_src scheme
+  (define acc (make-account 100 'secret-password))
+  (string=? ((acc 'some-other-password 'deposit) 40) "Incorrect password")
+  (string=? ((acc 'some-other-password 'deposit) 40) "Incorrect password")
+  (string=? ((acc 'some-other-password 'deposit) 40) "Incorrect password")
+  (string=? ((acc 'some-other-password 'deposit) 40) "Incorrect password")
+  (string=? ((acc 'some-other-password 'deposit) 40) "Incorrect password")
+  (string=? ((acc 'some-other-password 'deposit) 40) "Incorrect password")
+  (string=? ((acc 'some-other-password 'deposit) 40) "Calling the cops")
+
+  (= ((acc 'secret-password 'deposit) 40) 140)
+  (string=? ((acc 'some-other-password 'deposit) 40) "Incorrect password")
+#+end_src
+Note that after writing the correct password the number of attempts is reset.
+\newpage
+
+*** Exercise 3.5
+:PROPERTIES:
+:header-args: :tangle "3.5.scm"
+:END:
+#+begin_quote
+Implement Monte Carlo integration as a procedure ~estimate-integral~ that takes as arguments a predicate \( P \), upper and lower bounds \( x_1, x_2, y_1 \) and \( y_2 \) for the rectangle, and the number of trials to perform in order to produce the estimate. Your procedure should use the same monte-carlo procedure that was used above to estimate \( \pi \) . Use your ~estimate-integral~ to produce an estimate of \( \pi \) by measuring the area of a unit circle.
+#+end_quote
+Let's first copy procedures ~monte-carlo~ and ~random-in-range~ from the book.
+#+begin_src scheme
+  (define (monte-carlo trials experiment)
+    (define (iter trials-remaining trials-passed)
+      (cond ((= trials-remaining 0)
+             (/ trials-passed trials))
+            ((experiment)
+             (iter (- trials-remaining 1)
+                   (+ trials-passed 1)))
+            (else (iter (- trials-remaining 1)
+                        trials-passed))))
+    (iter trials 0))
+
+  (define (random-in-range low high)
+    (let ((range (- high low)))
+      (+ low (random range))))
+#+end_src
+Now we can implement ~estimate-integral~. We simply generate random points in the rectangle and check if they are in the unit circle. The ratio of points in the circle to the total number of points is an estimate of the area of the circle. Since the area of the circle is \( \pi \) we can multiply the ratio by the area of the rectangle to get an estimate of \( \pi \).
+#+begin_src scheme
+(define (estimate-integral P x1 x2 y1 y2 trials)
+  (define (experiment)
+    (let ((x (random-in-range x1 x2))
+	  (y (random-in-range y1 y2)))
+      (P x y)))
+  (* (monte-carlo trials experiment) (* (- x2 x1) (- y2 y1))))
+#+end_src
+To get our result we define a predicate ~in-unit-circle?~ that checks if a point is in the unit circle. We then call ~estimate-integral~ with the predicate and the bounds of the unit circle.
+#+begin_src scheme
+  (define (in-unit-circle? x y) (<= (+ (square x) (square y)) 1))
+  (define pi-approx (estimate-integral in-unit-circle? -1.0 1.0 -1.0 1.0 1000))
+#+end_src
+\newpage
+
+*** Exercise 3.6
+:PROPERTIES:
+:header-args: :tangle "3.6.scm"
+:END:
+#+begin_quote
+Design a new rand procedure that is called with an argument that is either the symbol ~generate~ or the symbol ~reset~ and behaves as follows: ~(rand 'generate)~ produces a new random number; ~((rand 'reset) ⟨new-value⟩)~ resets the internal state variable to the designated ~⟨new-value⟩~.
+#+end_quote
+Following the footnote instructions we create a simple ~rand-update~ with values for \( a, b\) and \( m \) chosen from Wikipedia's Linear congruential generator article.
+#+begin_src scheme
+  (define (rand-update x)
+    (let ((a 4)
+          (b 1)
+          (m 9))
+      (remainder (+ (* a x) b) m)))
+#+end_src
+Using this we can implement ~rand~. If the argument is ~generate~ we simply update the current state using ~rand-update~ and then return next value. If the argument is ~reset~ we set the state to the new value.
+#+begin_src scheme
+  (define rand
+    (let ((x 0))
+      (define (generate-random)
+        (begin (set! x (rand-update x)) x))
+      (define (reset-seed new-value)
+        (begin (set! x new-value) '()))
+      (define (dispatch m)
+        (cond ((eq? m 'reset) reset-seed)
+              ((eq? m 'generate) (generate-random))
+              (else (error "Need a symbol 'reset or 'generate"))))
+      dispatch))
+#+end_src
+Let's test our procedure by generating a random number and then resetting the seed to see if we get the same number again.
+#+begin_src scheme
+  (= (rand 'generate) 1)
+  (= (rand 'generate) 5)
+  ((rand 'reset) 0)
+  (= (rand 'generate) 1)
+  (= (rand 'generate) 5)
+#+end_src
+\newpage
+
+*** Exercise 3.7
+#+begin_quote
+Suppose that our banking system requires the ability to make joint accounts. Define a procedure ~make-joint~ that accomplishes this. ~make-joint~ should take three arguments. The first is a password-protected account. The second argument must match the password with which the account was defined in order for the ~make-joint~ operation to proceed. The third argument is a new password. ~make-joint~ is to create an additional access to the original account using the new password.
+#+end_quote
+Let's grab our solution from =Exercise 3.3=.
+#+begin_src scheme
+  (define (make-account balance password)
+    (define (withdraw amount)
+      (if (>= balance amount)
+          (begin (set! balance (- balance amount))
+                 balance)
+          "Insufficient funds"))
+    (define (deposit amount)
+      (begin (set! balance (+ balance amount))
+             balance))
+    (define (handle-incorrect-password x)
+      "Incorrect password")
+    (define (wrong-password? pwd)
+      (not (eq? pwd password)))
+    (define (dispatch pwd m)
+      (cond ((wrong-password? pwd) handle-incorrect-password)
+            ((eq? m 'withdraw) withdraw)
+            ((eq? m 'deposit) deposit)
+            (else (error "Unknown request: MAKE-ACCOUNT" m))))
+    dispatch)
+#+end_src
+We create an additional procedure ~make-joint~ that uses the account if the password matches. Otherwise it signals incorrect password.
+#+begin_src scheme
+  (define (make-joint account account-password joint-password)
+    (define (correct-password? pwd)
+      (eq? pwd joint-password))
+    (lambda (input-pwd request)
+      (if (correct-password? input-pwd)
+          (account account-password request)
+          (lambda (_) "Incorrect password"))))
+  #+end_src
+Now we can test our procedure by creating a joint account and observing how the first account changes as we use the joint account.
+#+begin_src scheme
+  (define peter-acc (make-account 100 'open-sesame))
+  (define paul-acc
+    (make-joint peter-acc 'open-sesame 'rosebud))
+
+  ;; test linked account
+  (= ((peter-acc 'open-sesame 'withdraw) 40) 60)
+  (= ((paul-acc 'rosebud 'deposit) 40) 100)
+
+  ;; test wrong password for Paul
+  (string=? ((paul-acc 'open-sesame 'withdraw) 100) "Incorrect password")
+
+  ;; test insufficient funds for Peter
+  (= ((paul-acc 'rosebud 'withdraw) 100) 0)
+  (string=? ((peter-acc 'open-sesame 'withdraw) 1) "Insufficient funds")
+#+end_src
+\newpage
+
+*** Exercise 3.8
+:PROPERTIES:
+:header-args: :tangle "3.8.scm"
+:END:
+#+begin_quote
+Define a simple procedure ~f~ such that evaluating ~(+ (f 0) (f 1))~ will return \( 0 \) if the arguments to ~+~ are evaluated from left to right but will return \( 1 \) if the arguments are evaluated from right to left.
+#+end_quote
+We let ~f~ initialize a local state variable ~state~ to \( 0 \). Then we construct ~f~ such that it returns a function ~g~ that always mutates ~state~ to the value of its argument \( x \). The return value of ~g~ will be the old ~state~ value before the update.
+#+begin_src scheme
+  (define f
+    (let ((state 0))
+      (define (g x)
+        (let ((old-state state))
+          (begin (set! state x)
+                 old-state)))
+      g))
+#+end_src
+In the expression ~(+ (f 0) (f 1))~ if the arguments are evaluated left to right, then the first call to ~f~ will be ~(f 0)~ so ~state~ will equal to \( 0 \) and return value will be \( 0 \) since that was the old state value due to initialization. The subsequent ~(f 1)~ will update ~state~ to \( 1 \) but the function returns the old state value \( 0 \). The final value is thus ~(+ 0 0) = 0~.
+
+Consequently, if the arguments are evaluated right to left, then the first call to ~f~ will be ~(f 1)~ and ~state~ would be set to \( 1 \), but due to initialization of ~state~ the old state value is \( 0 \) which is what we output. The next call ~(f 0)~ would set the ~state~ to \( 0 \), however this time the old ~state~ value is \( 1 \) which is what we output. Hence we have ~(+ 0  1) = 1~ as desired.
+\newpage
+
+** The Environment Model of Evaluation
+*** Exercise 3.9
+#+begin_quote
+Show the environment structures created by evaluating ~(factorial 6)~ using each version of the factorial procedure.
+#+end_quote
+We start with the recursive version of the factorial program. ~(factorial n)~ is defined in the global environment which means that we must bind the name ~factorial~ to it there (and point back to the global environment). When ~(factorial 6)~ is invoked we create \( 6 \) different environments \( E_1, \ldots, E_6 \) where we have bound the formal parameter \( n \).
+[[file:~/repos/scip/images/ch3/ex-3.9/factorial-rec.png]]
+In the last environment \( E_6 \) the function will return \( 1 \) since \( n = 1 \). This returned value will be propagated back to the caller in \( E_5 \) which will use that value for its calculation. This will continue until we reach \( E_1 \) where the final result is returned.
+
+Let's now look at the iterative version of the factorial program. Again ~factorial~ is defined in the global environment as is ~factorial-iter~.  When ~(factorial 6)~ is called, this time the first environment \( E_1 \) will need to lookup ~(factorial-iter)~ which is found the global environment. So we create a new environment \( E_2 \) where we bind the formal parameters ~product~, ~counter~ and ~max-count~ using values from \( E_1 \). We create another frame \( E_3 \) for evaluating ~factorial-iter~ with parameters set by \( E_2 \). We iterate this way until we are in an environment where ~count~ greater than ~max-count~. This happens in \( E_8 \) and then   we return the value of ~product~ back to all previous callers.
+[[file:~/repos/scip/images/ch3/ex-3.9/factorial-iter.png]]
+\newpage
