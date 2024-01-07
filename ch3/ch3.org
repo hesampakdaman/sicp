@@ -535,3 +535,46 @@ We will implement a set data structure, admittedly ineffienct. We will use the =
     (count x))
 #+end_src
 Using this new version of =count-pairs= with the list structres we defined in =Exercise 3.16=, all results are returned correctly as 3.
+\newpage
+
+*** Exercise 3.18
+:PROPERTIES:
+:header-args: :tangle "3.18.scm"
+:END:
+#+begin_quote
+Write a procedure that examines a list and determines whether it contains a cycle, that is, whether a program that tried to find the end of the list by taking successive =cdrs= would go into an infinite loop. =Exercise 3.13= constructed such lists.
+#+end_quote
+We can construct a path of =cons= by following each successive =cdr= of a list. If such a path of =cons= has a cycle, then at least one of the =cons= in the path points back to a previous =cons= in the path. We write the procedure =has-cycle?= using this fact.
+#+begin_src scheme
+  (define (has-cycle? x)
+    (define (cycle-in-path? x path)
+      (cond ((not (pair? x)) #f)
+            ((memq (cdr x) path) #t)
+            (else (cycle-in-path? (cdr x) (cons x path)))))
+    (cycle-in-path? x (list x)))
+#+end_src
+Let's test this procedure by creating a cycle and a non-cycle. From =Exercise 3.13= we use the procedure =make-cycle=.
+#+begin_src scheme
+  (define (make-cycle x)
+    (set-cdr! (last-pair x) x)
+    x)
+#+end_src
+Next let us define =x= with no cycle and =z= with a cycle.
+#+begin_src scheme
+  (define x '(a b c))
+  (define z (cons 'a (make-cycle (cons 'a 'b))))
+#+end_src
+We can now test our procedure by calling =has-cycle?= on =x= and =z=.
+#+begin_src scheme
+  (has-cycle? x)                           ; returns #f
+  (has-cycle? z)                           ; returns #t
+#+end_src
+However, note that we construct the path by =cdr=-ing down the list. This means that if we have a cycle in the =car= part of the list, then we will not detect it. We could easily amend this by adjusting the =cycle-in-path?= to check for cycles in the =car= part of the list as well.
+#+begin_src scheme
+  (define (cycle-in-path? x path)
+    (cond ((not (pair? x)) #f)
+          ((or (memq (car x) path) (memq (cdr x) path)) #t)
+          (else (or (cycle-in-path? (car x) (cons x path))
+                    (cycle-in-path? (cdr x) (cons x path))))))
+#+end_src
+\newpage
