@@ -492,10 +492,10 @@ We begin with the first two cases, where we construct =w= to return 3 and =x= to
   (define a (cons 'a b))
 
   (define w (cons a '()))
-  (count-pairs w)
+  (count-pairs w)                         ; returns 3
 
   (define x (cons a b))
-  (count-pairs x)
+  (count-pairs x)                         ; returns 4
 #+end_src
 The diagrams for these two cases are shown below.
 [[../images/ch3/ex-3.16/pair-3-4.jpg]]
@@ -503,7 +503,35 @@ For the third we construct =y= to return 7.
 #+begin_src scheme
   (define bb (cons b b))
   (define y (cons bb bb))
-  (count-pairs y)
+  (count-pairs y)                         ; returns 7
 #+end_src
- For the last case we simply let =z= to be a cycle using the =make-cycle= procedure from Exercise 3.13 =(define z (make-cycle (cons 'a (cons 'b (cons 'c '())))))=. We show diagrams below
+For the last case we simply let =z= to be a cycle using the =make-cycle= procedure from =Exercise 3.13=. We show diagrams below
+ #+begin_src scheme
+   (define (make-cycle x)
+     (set-cdr! (last-pair x) x)
+     x)
+
+   (define z (make-cycle (cons 'a (cons 'b (cons 'c '())))))
+   ;; (count-pairs z)                         ; will never halt
+ #+end_src
 [[../images/ch3/ex-3.16/pair-7-inf.jpg]]
+\newpage
+
+*** Exercise 3.17
+#+begin_quote
+Devise a correct version of the count-pairs procedure of =Exercise 3.16= that returns the number of distinct pairs in any structure. (Hint: Traverse the structure, maintaining an auxiliary data structure that is used to keep track of which pairs have already been counted.)
+#+end_quote
+We will implement a set data structure, admittedly ineffienct. We will use the =memq= procedure to check if an element is in the set and =cons= to add the element to the set. The number of pairs will be the length of our set.
+#+begin_src scheme
+  (define (count-pairs x)
+    (define seen-pair '())
+    (define (count x)
+      (cond ((not (pair? x)) 0)
+            ((memq x seen-pair) 0)
+            (else (set! seen-pair (cons x seen-pair))
+                  (+ (count (car x))
+                     (count (cdr x))
+                     1))))
+    (count x))
+#+end_src
+Using this new version of =count-pairs= with the list structres we defined in =Exercise 3.16=, all results are returned correctly as 3.
