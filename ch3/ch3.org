@@ -462,3 +462,48 @@ We draw the box-and-pointer diagram for =v= below.
 After the call =(define w (mystery v))= we have reversed the list =v= and bound it to =w=. However, the first =set-cdr!= in =loop= will mutate the value pointed by =v= by setting the =cdr= to =y= which is initialized by the empty list. In the next iteration, =v= will be passed in =loop= as =y= which is not mutated and in fact dropped. This means we only mutate the value of =v= once to =(a)=. We draw the box-and-pointer diagram for =v= and =w= below.
 [[../images/ch3/ex-3.14/define-w.jpg]]
 \newpage
+
+*** Exercise 3.15
+#+begin_quote
+Draw box-and-pointer diagrams to explain the effect of set-to-wow! on the structures =z1= and =z2= above.
+#+end_quote
+We draw the box-and-pointer diagram for =z1= and =z2= after the effects calling =set-to-wow!= on both of them, respectively.
+[[../images/ch3/ex-3.15/set-to-wow.jpg]]
+
+*** Exercise 3.16
+:PROPERTIES:
+:header-args: :tangle "3.16.scm"
+:END:
+#+begin_quote
+The number of pairs in any structure is the number in the car plus the number in the =cdr= plus one more to count the current pair.
+#+begin_src scheme
+  (define (count-pairs x)
+    (if (not (pair? x))
+        0
+        (+ (count-pairs (car x))
+           (count-pairs (cdr x))
+           1)))
+#+end_src
+Show that this procedure is not correct. In particular, draw box-and-pointer diagrams representing list structures made up of exactly three pairs for which Ben’s procedure would return 3; return 4; return 7; never return at all.
+#+end_quote
+We begin with the first two cases, where we construct =w= to return 3 and =x= to return 4.
+#+begin_src scheme
+  (define b (cons 'b '()))
+  (define a (cons 'a b))
+
+  (define w (cons a '()))
+  (count-pairs w)
+
+  (define x (cons a b))
+  (count-pairs x)
+#+end_src
+The diagrams for these two cases are shown below.
+[[../images/ch3/ex-3.16/pair-3-4.jpg]]
+For the third we construct =y= to return 7.
+#+begin_src scheme
+  (define bb (cons b b))
+  (define y (cons bb bb))
+  (count-pairs y)
+#+end_src
+ For the last case we simply let =z= to be a cycle using the =make-cycle= procedure from Exercise 3.13 =(define z (make-cycle (cons 'a (cons 'b (cons 'c '())))))=. We show diagrams below
+[[../images/ch3/ex-3.16/pair-7-inf.jpg]]
