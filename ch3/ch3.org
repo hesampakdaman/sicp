@@ -578,3 +578,20 @@ However, note that we construct the path by =cdr=-ing down the list. This means 
                     (cycle-in-path? (cdr x) (cons x path))))))
 #+end_src
 \newpage
+
+*** Exercise 3.19
+#+begin_quote
+Redo =Exercise 3.18= using an algorithm that takes only a constant amount of space. (This requires a very clever idea.)
+#+end_quote
+We can use the famous =tortoise-and-hare= algorithm for detecting cycles in a list. The idea is to have two pointers, one that moves one step at a time and another that moves two steps at a time. If there is a cycle in the list, then the two pointers will eventually point to the same =cons= in the list.
+
+Since we only use two pointers to travers in addition to the list, this algorithm takes constant space. We write the procedure =has-cycle?= using this idea.
+#+begin_src scheme
+  (define (has-cycle? x)
+    (define (tortoise-and-hare tortoise hare)
+      (cond ((not (pair? hare)) #f)
+            ((eq? tortoise hare) #t)
+            (else (tortoise-and-hare (cdr tortoise) (cddr hare)))))
+    (tortoise-and-hare x (cdr x)))
+#+end_src
+Note that the procedure above only works for non-empty lists. We can easily amend this by adding a conditional before the call to =tortoise-and-hare= in =has-cycle?=. But we omit it to not clutter the code.
