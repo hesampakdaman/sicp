@@ -658,3 +658,50 @@ To define a procedure =print-queue= we simply traverse the queue starting from t
   (define (print-queue q)
     (front-ptr q))
 #+end_src
+\newpage
+
+*** Exercise 3.22
+#+begin_quote
+Complete the definition of =make-queue= and provide implementations of the queue operations using this representation.
+#+begin_src scheme
+  (define (make-queue)
+    (let ((front-ptr . . . )
+          (rear-ptr . . . ))
+      ⟨definitions of internal procedures⟩
+      (define (dispatch m) . . .)
+      dispatch))
+#+end_src
+#+end_quote
+We initialize =front-ptr= and =rear-ptr= to be empty lists. Whenever we insert an =item=, we simply tack the pair =(cons item '())= onto the current rear, and then =set!= the =rear-ptr= to this pair. For deletion we simply set =front-ptr= to its =cdr=.
+#+begin_src scheme
+  (define (make-queue)
+    (let ((front-ptr '())
+          (rear-ptr '()))
+      (define (empty?) (null? front-ptr))
+      (define (insert! item)
+        (let ((new-pair (cons item '())))
+          (cond ((empty?)
+                 (set! front-ptr new-pair)
+                 (set! rear-ptr new-pair)
+                 front-ptr)
+                (else
+                 (set-cdr! rear-ptr new-pair)
+                 (set! rear-ptr new-pair)
+                 front-ptr))))
+      (define (delete!) (set! front-ptr (cdr front-ptr)) front-ptr)
+      (define (dispatch m)
+        (cond ((eq? m 'empty?) (empty?))
+              ((eq? m 'front) (car front-ptr))
+              ((eq? m 'insert!) insert!)
+              ((eq? m 'delete) (delete!))
+              ((eq? m 'print) front-ptr)))
+      dispatch))
+#+end_src
+Now we define the rest of interface for =queue= in terms of the =dispatch=.
+#+begin_src scheme
+  (define (delete-queue! queue) (queue 'delete))
+  (define (empty-queue? queue) (queue 'empty?))
+  (define (front-queue queue) (queue 'front))
+  (define (insert-queue! queue item) ((queue 'insert!) item))
+  (define (print-queue queue) (queue 'print))
+#+end_src
