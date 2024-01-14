@@ -583,7 +583,7 @@ However, note that we construct the path by =cdr=-ing down the list. This means 
 #+begin_quote
 Redo =Exercise 3.18= using an algorithm that takes only a constant amount of space. (This requires a very clever idea.)
 #+end_quote
-We can use the famous =tortoise-and-hare= algorithm for detecting cycles in a list. The idea is to have two pointers, one that moves one step at a time and another that moves two steps at a time. If there is a cycle in the list, then the two pointers will eventually point to the same =cons= in the list.
+We can use the famous =tortoise-and-hare= algorithm for detecting cycles in a list. The idea is to have two pointers, one that moves one step at a time and another that moves two steps at a time. If there is a cycle in the list, then the two pointers will eventually point to the same =cons= in the list. We omit the proof here.
 
 Since we only use two pointers to travers in addition to the list, this algorithm takes constant space. We write the procedure =has-cycle?= using this idea.
 #+begin_src scheme
@@ -595,3 +595,36 @@ Since we only use two pointers to travers in addition to the list, this algorith
     (tortoise-and-hare x (cdr x)))
 #+end_src
 Note that the procedure above only works for non-empty lists. We can easily amend this by adding a conditional before the call to =tortoise-and-hare= in =has-cycle?=. But we omit it to not clutter the code.
+\newpage
+
+*** Exercise 3.20
+#+begin_quote
+Draw environment diagrams to illustrate the evaluation of the sequence of expressions
+#+begin_src scheme
+  (define x (cons 1 2))
+  (define z (cons x x))
+  (set-car! (cdr z) 17)
+  (car x)
+  17
+#+end_src
+using the procedural implementation of pairs given above. (Compare =Exercise 3.11=.)
+#+end_quote
+=cons= points to a procedure enclosed by the global environment with parameters =x, y=. When defining =x= we create a new frame =E1= where we bound =cons= parameters to =1, 2= and evaluate the body. We see the result in the diagram below.
+[[../images/ch3/ex-3.20/define-x.jpg]]
+
+Similarly, when defining =z= we create a new frame =E2=, but this time bound =cons= parameters to =x, x=.
+[[../images/ch3/ex-3.20/define-z.jpg]]
+
+Now we want to evaluate the compound expression =(set-car! (cdr z) 17)=. First we need to evaluate all sub-expressions. This means we begin with =(cdr z)= since =17= is a primitve. Therefore we create a new frame =E3= where we bound =cdr= parameters to =z= and evaluate the body.
+
+This leaves us the expression =(z 'cdr)= and we look in the global enviroment after =z=. We find that =z= points to a procedural object called =dispatch= in =E2=. As before, create a new frame =E4= and bind the =dispatch='s parameter =m= to ='cdr=. Evaluation of the body gives us the symbol =x=.
+
+The expression we need to evaluate now is =(set-car! x 17)=. At this point every sub-expression is known in the global environment so we must apply =set-car!= to the parameters. Hence, we create a new frame =E5= and bind =set-car!='s parameters to =x, 17= and leaves us with the expression =(((x 'set-car!) 17) x)=.
+
+The sub-expression =(x 'set-car!)= is evaluated in a new frame =E6= and results in =set-x!= procedure defined in enviroment =E1=. We have =((set-x! 17) x)= left to evaluate. For =(set-x! 17)= we create a new frame =E7= enclosed by =E1=. Following the procedure =set-x!= and binding its parameter to =17= has the effect of setting the =car= of =x= to the value =17=. Lastly, we just return =x= back to the caller.
+[[../images/ch3/ex-3.20/set-car.jpg]]
+
+The final result is that the =car= value of =x= was mutated. Since =cdr z= points to =x=, =z= will also be affected by this as a side-effect.
+[[../images/ch3/ex-3.20/final.jpg]]
+
+=Exercise 3.11= is similar in that we have internal definitions and variables. So the two evaluations of =cons= leads to two enviroments =E1= and =E2=, both of which have their own =dispatch=, exactly as in =Exercise 3.11=. However, a difference here is that when defining =z= we bind it to the previously created =x= -- in effect coupling them as we've seen in the final result.
