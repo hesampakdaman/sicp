@@ -628,3 +628,33 @@ The final result is that the =car= value of =x= was mutated. Since =cdr z= point
 [[../images/ch3/ex-3.20/final.jpg]]
 
 =Exercise 3.11= is similar in that we have internal definitions and variables. So the two evaluations of =cons= leads to two enviroments =E1= and =E2=, both of which have their own =dispatch=, exactly as in =Exercise 3.11=. However, a difference here is that when defining =z= we bind it to the previously created =x= -- in effect coupling them as we've seen in the final result.
+\newpage
+
+*** Exercise 3.21
+#+begin_quote
+Ben Bitdiddle decides to test the queue implementation described above. “It’s all wrong!” he complains. “The interpreter’s response shows that the last item is inserted into the queue twice. Show why Ben’s examples produce the printed results that they do. Define a procedure =print-queue= that takes a queue as input and prints the sequence of items in the queue.
+#+end_quote
+A sequence of =cons= terminated by ='()= is printed as a list in Scheme. Hence
+#+begin_src scheme
+  (cons 'a '())
+  (a)
+  (cons 'a 'b)
+  (a . b)
+#+end_src
+When we evaluate the following expressions, as Ben Bitdiddle does,
+#+begin_src scheme
+  (define q1 (make-queue))
+  (insert-queue! q1 'a)
+#+end_src
+then =q1= will point to the pair =(cons (cons 'a '()) (cons 'a '()))=. Therefore the print will be
+#+begin_src scheme
+  ((a) a)
+#+end_src
+There's a nested parenthesis to distinguish that the =car= is a list in its own, which we wouldn't have seen if it was printed without them like so =(a a)=. Subsequent insertion =(insert-queue! q1 'b)= will make =q1= to point to the pair =(cons (cons 'a (cons 'b '())) (cons 'b '()))= and print =((a b) b)=. However, do note that =rear-ptr= is just a pointer to the =last-pair= in =(cons 'a (cons 'b '()))= as can be seen in the diagram below.
+#+ATTR_LATEX: :width 0.40\textwidth
+[[../images/ch3/ex-3.21/insert-queue.jpg]]
+To define a procedure =print-queue= we simply traverse the queue starting from the =front-ptr= and =cdr= until we reach the end of the queue. We print the =car= of each pair along the way. But this is what Scheme already does when we print a list. So we can just return the =front-ptr= and Scheme will print it for us.
+#+begin_src scheme
+  (define (print-queue q)
+    (front-ptr q))
+#+end_src
