@@ -705,3 +705,106 @@ Now we define the rest of interface for =queue= in terms of the =dispatch=.
   (define (insert-queue! queue item) ((queue 'insert!) item))
   (define (print-queue queue) (queue 'print))
 #+end_src
+\newpage
+
+*** Exercise 3.23
+#+begin_quote
+A /deque/ (“double-ended queue”) is a sequence in which items can be inserted and deleted at either the front or the rear. Operations on deques are the constructor =make-deque=, the predicate =empty-deque?=, selectors =front-deque= and =rear-deque=, mutators =front-insert-deque!=, =rear-insert-deque!=, =front-delete-deque!=, and =rear-delete-deque!=. Show how to represent deques using pairs, and give implementations of the operations. All operations should be accomplished in \( \Theta (1) \) steps.
+#+end_quote
+We begin by making an abstraction of the elements that go into our deque. This is not necessary but helps with readiblity of the code. Each element is called a =node= and consists of an item and two pointers =prev= and =next=. If a =node= is the first element in the deque, then its =prev= pointer will be empty. Similarly, if a =node= is the last element in the deque, then its =next= pointer will be empty. We can define the =deque= simply by a =cons= with elements of type =node=. The image below shows a =deque= of three nodes which hold items =a, b, c=, respectively. We mark the middle =node= in the image with a dashed box.
+                   [[../images/ch3/ex-3.23/deque.jpg]]
+As can be seen in the diagram above, we define a =node= to consts of two pairs. In addtion, we provide helpers =prev=, =next= and their mutators to facilitate creating the =deque= later on.
+#+begin_src scheme
+  (define (make-node item)
+    (cons (cons item '()) '()))
+  (define (item node) (caar node))
+  (define (prev node) (cdar node))
+  (define (next node) (cdr node))
+  (define (set-prev! node item) (set-cdr! (car node) item))
+  (define (set-next! node item) (set-cdr! node item))
+#+end_src
+We can now define the =deque= and implements its interface with help of the facilities of =node=.
+#+begin_src scheme
+  (define (make-deque) (cons '() '()))
+  (define (front-deque deque) (car deque))
+  (define (rear-deque deque) (cdr deque))
+  (define (empty-deque? deque) (null? (front-deque deque)))
+  (define (set-front! deque item) (set-car! deque item))
+  (define (set-rear! deque item) (set-cdr! deque item))
+  (define (front-insert-deque! deque item)
+    (cond ((empty-deque? deque)
+           (let ((new-pair (make-node item)))
+             (set-front! deque new-pair)
+             (set-rear! deque new-pair)
+             #t))
+          (else
+           (let ((new-item (make-node item)))
+             (set-prev! (front-deque deque) new-item)
+             (set-next! new-item (front-deque deque))
+             (set-front! deque new-item)
+             #t))))
+
+  (define (rear-insert-deque! deque item)
+    (cond ((empty-deque? deque)
+           (let ((new-pair (make-node item)))
+             (set-front! deque new-pair)
+             (set-rear! deque new-pair)
+             deque))
+          (else
+           (let ((new-rear (make-node item))
+                 (current-rear (rear-deque deque)))
+             (set-next! current-rear new-rear)
+             (set-prev! new-rear current-rear)
+             (set-rear! deque new-rear)
+             #t))))
+
+  (define (front-delete-deque! deque)
+    (cond ((empty-deque? deque) #t)
+          ((null? (next (front-deque deque)))
+           (set-front! deque '())
+           (set-front! deque '())
+           #t)
+          (else
+           (let ((new-front (next (front-deque deque))))
+             (set-prev! new-front '())
+             (set-front! deque new-front)
+             #t))))
+
+  (define (rear-delete-deque! deque)
+    (cond ((empty-deque? deque) #t)
+          ((null? (prev (rear-deque deque)))
+           (set-rear! deque '())
+           (set-front! deque '())
+           #t)
+          (else
+           (let ((new-rear (prev (rear-deque deque))))
+             (set-next! new-rear '())
+             (set-rear! deque new-rear)
+             #t))))
+#+end_src
+In order to avoid Scheme printing the cycle we have in the =deque=, some of our operations simply output =#t=. However, we also provide the =print-deque= procedure which prints the =item= of each =node= in the =deque=.
+#+begin_src scheme
+  (define (print-deque deque)
+    (define (iter node)
+      (if (null? node)
+          '()
+          (cons (item node) (iter (next node)))))
+    (iter (front-deque deque)))
+#+end_src
+Let's test our implementation by creating a =deque= and inserting and deleting elements.
+#+begin_src scheme
+  (define d (make-deque))
+  (empty-deque? d)                        ; returns #t
+  (front-insert-deque! d 2)
+  (empty-deque? d)                        ; returns #f
+  (front-insert-deque! d 1)
+  (rear-insert-deque! d 3)
+  (print-deque d)                         ; returns (1 2 3)
+
+  (rear-delete-deque! d)
+  (print-deque d)                         ; returns (1 2)
+  (front-delete-deque! d)
+  (print-deque d)                         ; returns (2)
+  (rear-delete-deque! d)
+  (empty-deque? d)                        ; returns #t
+#+end_src
