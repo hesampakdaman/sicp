@@ -808,3 +808,58 @@ Let's test our implementation by creating a =deque= and inserting and deleting e
   (rear-delete-deque! d)
   (empty-deque? d)                        ; returns #t
 #+end_src
+\newpage
+
+*** Exercise 3.24
+#+begin_quote
+Design a table constructor =make-table= that takes as an argument a =same-key?= procedure that will be used to test “equality” of keys. =make- table= should return a =dispatch= procedure that can be used to access appropriate =lookup= and =insert!= procedures for a local table.
+#+end_quote
+The only difference would be that our =assoc= in this case uses =same-key?= to test for equality.
+#+begin_src scheme
+  (define (assoc key records)
+    (cond ((null? records) false)
+          ((same-key? key (caar records)) (car records))
+          (else (assoc key (cdr records)))))
+#+end_src
+This new =assoc= can be used as a local definition inside the =make-table= procedure.
+#+begin_src scheme
+  (define (make-table same-key?)
+    (let ((local-table (list '*table*)))
+      (define (assoc key records)
+        (cond ((null? records) false)
+              ((same-key? key (caar records)) (car records))
+              (else (assoc key (cdr records)))))
+      (define (lookup key)
+        (let ((record (assoc key (cdr local-table))))
+          (if record
+              (cdr record)
+              false)))
+      (define (insert! key value)
+        (let ((record (assoc key (cdr local-table))))
+          (if record
+              (set-cdr! record value)
+              (set-cdr! local-table
+                        (cons (cons key value)
+                              (cdr local-table)))))
+        'ok)
+      (define (dispatch m)
+        (cond ((eq? m 'lookup-proc) lookup)
+              ((eq? m 'insert-proc!) insert!)
+              (else (error "Unknown operation: TABLE" m))))
+      dispatch))
+#+end_src
+To test we simply need to provide a =same-key?= procedure and create a table with it
+#+begin_src scheme
+  (define (same-key? key-1 key-2) (< (abs (- key-1 key-2)) 0.5))
+  (define operation-table (make-table same-key?))
+  (define get (operation-table 'lookup-proc))
+  (define put (operation-table 'insert-proc!))
+#+end_src
+and now we are ready to use the table.
+#+begin_src scheme
+  (put 1.0 'a)
+  (put 2.0 'b)
+  (get 1.4)                               ; returns 'a
+  (get 2.5)                               ; returns #f
+  (get 1.9)                               ; returns 'b
+#+end_src
