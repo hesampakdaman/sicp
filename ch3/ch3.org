@@ -863,3 +863,100 @@ and now we are ready to use the table.
   (get 2.5)                               ; returns #f
   (get 1.9)                               ; returns 'b
 #+end_src
+\newpage
+
+*** Exercise 3.25
+#+begin_quote
+Generalizing one- and two-dimensional tables, show how to implement a table in which values are stored under an arbitrary number of keys and different values may be stored under diﬀerent numbers of keys. The =lookup= and =insert!= procedures should take as input a list of keys used to access the table.
+#+end_quote
+To generalize the table we need to have the ability to create sub-tables for any key where appropriate. We can do this by using the same =make-table= procedure as in =Exercise 3.24= but modify =insert!= to create sub-tables on the fly when needed. To do so we have to take care of a few base cases.
++ If we only have one key =(null? (cdr keys))= we either have to insert the value in the record if it exists or put it inside a new record that we store the table.
+
++ If we have more than one key we need to check if the record exists =(eq? record false)=.
+  + If it does not exist we need to create a new sub-table and recursively insert the value in it.
+  + If it does exist we need to check if it is a sub-table =(pair? (cdr record))=.
+    + If it is a sub-table we need simply recursively insert the value in the sub-table.
+    + If it is not a sub-table we remove the value-part of the record =(set-cdr! record '())= and insert our value in the record as if the record would be a sub-table =(insert! (cdr keys) value record))=.
+#+begin_src scheme
+  (define (insert! keys value table)
+    (let ((record (assoc (car keys) (cdr table))))
+      (cond ((null? (cdr keys))
+             (if record
+                 (set-cdr! record value)
+                 (set-cdr! table (cons (cons (car keys) value) (cdr table)))))
+            (else
+             (cond ((eq? record false)
+                    (let ((new-table (cons (cons (car keys) '()) (cdr table))))
+                      (set-cdr! table new-table)
+                      (insert! (cdr keys) value (car new-table))))
+                   ((not (pair? (cdr record)))
+                    (set-cdr! record '())
+                    (insert! (cdr keys) value record))
+                   (else (insert! (cdr keys) value record)))))))
+#+end_src
+We also need to modify =lookup= to be able to traverse the sub-tables given a set of keys. This is fairly straight forward and we can use the same =assoc= as in =Exercise 3.24=.
+#+begin_src scheme
+  (define (lookup keys table)
+    (let ((record (assoc (car keys) (cdr table))))
+      (cond ((null? (cdr keys))
+             (if record
+                 (cdr record)
+                 false))
+            ((and record (pair? (cdr record)))
+             (lookup (cdr keys) record))
+            (else false))))
+#+end_src
+Now we can put it all together under =make-table= which our interface will use.
+  #+begin_src scheme
+    (define (make-table)
+      (let ((local-table (list '*table*)))
+        (define (lookup keys table)
+          (let ((record (assoc (car keys) (cdr table))))
+            (cond ((null? (cdr keys))
+                   (if record
+                       (cdr record)
+                       false))
+                  ((and record (pair? (cdr record)))
+                   (lookup (cdr keys) record))
+                  (else false))))
+        (define (insert! keys value table)
+          (let ((record (assoc (car keys) (cdr table))))
+            (cond ((null? (cdr keys))
+                   (if record
+                       (set-cdr! record value)
+                       (set-cdr! table (cons (cons (car keys) value) (cdr table)))))
+                  (else
+                   (cond ((eq? record false)
+                          (let ((new-table (cons (cons (car keys) '()) (cdr table))))
+                            (set-cdr! table new-table)
+                            (insert! (cdr keys) value (car new-table))))
+                         ((not (pair? (cdr record)))
+                          (set-cdr! record '())
+                          (insert! (cdr keys) value record))
+                         (else (insert! (cdr keys) value record)))))))
+        (define (dispatch m)
+          (cond ((eq? m 'lookup-proc) (lambda (keys) (lookup keys local-table)))
+                ((eq? m 'insert-proc!) (lambda (keys value) (insert! keys value local-table)))
+                (else (error "Unknown operation: TABLE" m))))
+        dispatch))
+#+end_src
+Let's make a table to test our implementation with
+#+begin_src scheme
+  (define operation-table (make-table))
+  (define get (operation-table 'lookup-proc))
+  (define put (operation-table 'insert-proc!))
+  (define print (operation-table 'print))
+#+end_src
+which we use in the test below
+#+begin_src scheme
+  (put '(1) 'a)
+  (put '(2) 'b)
+  (get '(1))                              ; returns 'a
+  (get '(2))                              ; returns 'b
+  (put '(1 1) 'c)
+  (put '(1 2) 'd)
+  (get '(1))                              ; returns table ((1 . c) (2 . d))
+  (get '(1 1))                            ; returns 'c
+  (get '(1 2))                            ; returnc 'd
+  (get '(2))                              ; returns 'b
+#+end_src
