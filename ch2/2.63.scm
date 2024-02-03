@@ -31,30 +31,31 @@
 ;; combine both recursive calls using append procedure which has
 ;; time-complexity is O(n). Hence
 ;;
-;; T(n) = 2T(n/2) + n = 2 [2T(n/4) + n/2] = 2 [2 [T(n/8) + n/4] + n/2]
-;;      = 4T(n/8) + 2n = ... = 2^k T(n/2^k) + kn
+;; T(n) = 2T(n/2) + n = 2 [2T(n/4) + n/2] + n = 4T(n/4) + 2n
+;;      = 4 [2T(n/8) + n/4] + 2n = 8T(n/8) + 3n
+;;      = ... = 2^k T(n/2^k) + kn
 ;;
 ;; The base case T(1) = 1 since in that case the procedure simply
-;; returns the empty list. Therefore,
+;; returns the empty list. Therefore, if we do this procedure until
+;; n/2^k = 1 (which implies k = log_2 n) we have
 ;;
-;; T(1) = 2^(log_2 n) T (n/2^log_2 n) + n*log_2 n =
+;; T(n) = 2^(log_2 n) T(n/2^log_2 n) + n * log_2 n =
 ;;      = 2^(log_2 n) + n * log_2 n
 ;;      = n + n * log_2 n,
 ;;
-;; where we used the fact that T(n/2^log_2 n) = T(1) = 1.
-;;
-;; From here we see that T(n) = O(n + n*log_2 n) = O(n*log n).
+;; where we used the fact that T(n/2^log_2 n) = T(1) = 1. From here we
+;; see that T(n) = O(n + n*log_2 n) = O(n * log n).
 ;;
 ;;
 ;; Following the same reasoning for the next procedure we get the
 ;; recurrence relation
 ;;
-;; T(n) = 2 * T(n/2) + 1,
+;; T(n) = 2T(n/2) + 1,
 ;;
 ;; where the last term is due to the fact of using one cons with
 ;; constant time-complexity to combine elements rather than
 ;; append. Hence
 ;;
-;; T(n) = 2^k T(n/2^k) + k => T(n) = n + log_2 n.
+;; T(n) = 2^k * T(n/2^k) + k => T(n) = n + log_2 n.
 ;;
 ;; Again we used the fact that T(1) = 1. Hence T(n) = O(n).
