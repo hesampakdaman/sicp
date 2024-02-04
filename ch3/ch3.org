@@ -1032,3 +1032,18 @@ It is easy to see how we can extend this implementation to work non-numerical ke
 \newpage
 
 *** Exercise 3.27
+#+begin_quote
+Draw an environment diagram to analyze the computation of =(memo-fib 3)=. Explain why =memo-fib= computes the \( n^\mathrm{th} \) Fibonacci number in a number of steps proportional to \( n \). Would the scheme still work if we had simply deﬁned memo- fib to be =(memoize fib)=?
+#+end_quote
+Beginning with the evaluation of =(define (memoize f) ...)= we get a procedural object which is enclosed by the global environment. This object has =f= as its formal parameter.
+
+Next we evaluate the expression =(define memo-fib (memoize (lambda (n) ...)))=. First evaluate the sub-expression that is =(lambda (n) ...)=. This results in a procedural object with formal parameter =n= and since we evaluated this in the global environment that would enclose this object. Now we look up =memoize= in the global environment and bind its formal parameter =f= to the procedural object we just created in a new frame =E1=. This leads us to a =let= expression we can now evaluate in a new frame =E2= which would be enclosed by =E1=. In =E2= we bind =table= to the result of =make-table=. This results in a new procedural object which is enclosed by =E2= and has =x= as its formal parameter. This object is returned and bound to =memo-fib= in the global environment.
+[[../images/ch3/ex-3.27/memo-fib.jpg]]
+
+When we call =(memo-fib 3)= we create a new environment where we have bound =x= to 3. We run the lookup procedure and find that there is no entry for this argument. Hence we must use =f= to calculate the result which we can insert into the =table=. We find =f= in =E1= from =E2=. We create a new frame where =n= is bound to 3 and evaluate the body of =f=. This results in us having to call =(memo-fib 2)= and =(memo-fib 1)=. We find these in the global environment enclosed by =E2=, which means both of these call will have access to the same =table= variable. These in turn will have to be evaluated and can lookup/insert data into the =table= that can be accessed by later calls to =memo-fib=. At the end of the computation we have a =table= that contains the results of all calls to =memo-fib=. Here we have assumed that the right-most argument gets evaluated first. This will impact the order in which the =table= is filled.
+[[../images/ch3/ex-3.27/memo-fib-3.jpg]]
+
+We now show that the number of steps to calculate the \( n^\mathrm{th} \) Fibonacci number is proportional to \(n\). We see that in each call to =memo-fib= we spawn two new calls to =memo-fib= with \(n-1\) and \(n-2\) as arguments. So the number of steps to get to =0= is proportional to \(n\). However, note that the call =(memo-fib n-1)= would also call =(memo-fib n-2)= which means we would calculate =(memo-fib n-2)= at least twice. But since we store previous results in the =table= we can simply look up the result of =(memo-fib n-2)= in the =table= instead of recalculating it and thus avoid the extra computation. This is why =memo-fib= computes the \( n^\mathrm{th} \) Fibonacci number in a number of steps proportional to \( n \).
+
+Lastly, the scheme would work sub-optimally if we had =(define memo-fib (memoize fib))=. This is because only the result of the first call =(memo-fib 3)= would be inserted in the =table=. All of the other recursive calls to  calculate the previous Fibonacci number use =fib=, which is defined in the global environment. =fib= is a procedure that does not store anything in a =table= (even if it would it has no access to =table= defined in =E2=).
+[[../images/ch3/ex-3.27/memo-with-fib.jpg]]
