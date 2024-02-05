@@ -469,6 +469,7 @@ Draw box-and-pointer diagrams to explain the effect of set-to-wow! on the struct
 #+end_quote
 We draw the box-and-pointer diagram for =z1= and =z2= after the effects calling =set-to-wow!= on both of them, respectively.
 [[../images/ch3/ex-3.15/set-to-wow.jpg]]
+\newpage
 
 *** Exercise 3.16
 :PROPERTIES:
