@@ -1100,7 +1100,7 @@ This is almost what we want. If we had inverted the output of \( \lnot p \land \
 #+end_src
 Our implementation has three =inverter= and one =and-gate=. The delay time of the =or-gate= is the sum of the delay times would be
                                  \[ 2I_d + A_d, \]
-where \(I_d\) is the delay time of the =inverter= and \(A_d\) is the delay of the =and-gate=. We only get twice the =inverter= delay because the first two inverters for wires \(a_1, a_2\) run in parallell.
+where \(I_d\) is the delay time of the =inverter= and \(A_d\) is the delay of the =and-gate=. We only get twice the =inverter= delay because the first two inverters for wires \(a_1, a_2\) run in parallel.
 
 \newpage
 
