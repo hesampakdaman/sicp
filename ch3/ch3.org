@@ -1105,3 +1105,23 @@ where \(I_d\) is the delay time of the =inverter= and \(A_d\) is the delay of th
 \newpage
 
 *** Exercise 3.30
+#+begin_quote
+Write a procedure =ripple-carry-adder= that generates this circuit [shown in Fig 3.27]. The procedure should take as arguments three lists of \( n \) wires each—the \(A_k \), the \(B_k\) , and the \(S_k\) —and also another wire \( C \).
+#+end_quote
+The number of =full-adder= we need to string together is the same as the length of any of the lists \(A_k, B_k, S_k\). Thus we can recursively construct the circuit until we reach the last input the list.
+#+begin_src scheme
+  (define (ripple-carry-adder Ak Bk Sk c-in)
+    (let ((c-out (make-wire)))
+      (full-adder (car Ak) (car Bk) c-in (car Sk) c-out)
+      (if (not (null? (cdr Ak)))
+          (ripple-carry-adder (cdr Ak) (cdr Bk) (cdr Sk) c-out))
+      'ok))
+#+end_src
+Note that we have assumed that the initial signal of =(make-wire)= procedure is \(0\), for otherwise we have to run =(set-signal! c-out 0)= if =(cdr Ak)= is null.
+
+The time delay of our circuit is the sum of all =full-adder= in the circuit, which we denote as \( n F_d \) where \(F_d\) is the time delay of one =full-adder=. Each =full-adder= has a delay of \( 2nH_d + nI_d \), where \(H_d, I_d\) are the time delays of =half-adder= and =inverter= respectively. In turn, the =half-adder= has a time delay of \( 2A_d + \max{(O_d, A_d + I_d)}. \)
+Here we denote the =and-gate= by \(A_d\) and \(O_d\) is the =or-gate=. Hence the =ripple-carry-adder= will have a total time delay of
+        \[ 4nA_d + 2n \cdot \max{(O_d, A_d + I_d)} + nI_d. \]
+\newpage
+
+*** Exercise 3.31
