@@ -1125,3 +1125,35 @@ Here we denote the =and-gate= by \(A_d\) and \(O_d\) is the =or-gate=. Hence the
 \newpage
 
 *** Exercise 3.31
+#+begin_quote
+The internal procedure =accept-action-procedure!= deﬁned in =make-wire= speciﬁes that when a new action procedure is added to a wire, the procedure is immediately run. Explain why this initialization is necessary. In particular, trace through the =half-adder= example in the paragraphs above and say how the system’s response would diﬀer if we had deﬁned =accept-action-procedure!= as
+#+begin_src scheme
+  (define (accept-action-procedure! proc)
+    (set! action-procedures
+          (cons proc action-procedures)))
+#+end_src
+#+end_quote
+If we don't run the procedure immediately when creating the function box, then none of the wires' signal will change at this stage. This means that the signal in each wire may be wrong depending on the values it receives. Let's look at the =half-adder= definition
+#+begin_src scheme
+  (define (half-adder a b s c)
+    (let ((d (make-wire)) (e (make-wire)))
+      (or-gate a b d)
+      (and-gate a b c)
+      (inverter c e)
+      (and-gate d e s)
+      'ok))
+#+end_src
+Assume that all wires \(a, b, s\) and \(c\) have signal 0. Then we expect that
+1) =(or-gate a b d)= produces a 0 signal in wire \(d\).
+2) =(and-gate a b c)= produces a 0 signal in wire \(c\).
+3) =(inverter c e)= produces a 1 signal in wire \(e\).
+4) =(and-gate d e s)= produces a 0 signal in wire \(s\).
+All cases above are satisfied except 3). Since \(e\) was created with =(make-wire)= it will be initialized to 0. But because we don't run the action procedure immediately, =(inverter c e)= will not change the signal in \(e\). Hence \(e\) will remain initialized to 0 when it should have been changed to 1.
+
+This has consequences for the response we get from the =half-adder=. We know before that the output \(s\) will be 1 whenever precisely one of \(a\) or \(b\) signal is 1. But this is no longer true. Because, if we now
+#+begin_src scheme
+  (set-signal! a 1)
+  (propagate)
+#+end_src
+then \(d\) is 1 due to =(or-gate a b d)=, \(c\) will not change due to =(and-gate a b c)= and therefore =(inverter c e)= will not run its action procedure. So \(e\) will remain 0 and therefore \(s\) will be 0 because =(and-gate d e s)= will not change the output signal.
+\newpage
