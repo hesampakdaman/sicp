@@ -1157,3 +1157,30 @@ This has consequences for the response we get from the =half-adder=. We know bef
 #+end_src
 then \(d\) is 1 due to =(or-gate a b d)=, \(c\) will not change due to =(and-gate a b c)= and therefore =(inverter c e)= will not run its action procedure. So \(e\) will remain 0 and therefore \(s\) will be 0 because =(and-gate d e s)= will not change the output signal.
 \newpage
+
+*** Exercise 3.32
+#+begin_quote
+The procedures to be run during each time segment of the agenda are kept in a queue. Thus, the procedures for each segment are called in the order in which they were added to the agenda (ﬁrst in, ﬁrst out). Explain why this order must be used. In particular, trace the behavior of an =and-gate= whose inputs change from 0, 1 to 1, 0 in the same segment and say how the behavior would differ if we stored a segment’s procedures in an ordinary list, adding and removing procedures only at the front (last in, ﬁrst out).
+#+end_quote
+Denote the input wires to the =and-gate= with \(a, b\) and the output as \(c\). Assume that we change the signal in the wire \( b \) first.
+
+If we process the queue as first in, first out then we change \( b \) first so that
+          \[ (a=0, b=1, c=0) \rightarrow (a=0, b=0, c=0). \]
+After this first action, since \( b \) changed, the =and-gate= will add an action item in the agenda to run after =and-gate-delay= with input to the =logical-and= \((a=0, b=0)\). The next change is
+          \[ (a=0, b=0, c=0) \rightarrow (a=1, b=0, c=0). \]
+Again another action added to the agenda to be run after =and-gate-delay= but this time with input to the =logical-and= as \( (a=1, b=0) \). Finally we process the two action items added by the =and-gate=
+                   \[ (a=1, b=1) \rightarrow c=1 \]
+and then
+                  \[ (a=1, b=0) \rightarrow c=0. \]
+So the final state will be \( (a=1, b=0, c=0) \) which is correct.
+
+Now let's compare it with a last in, first out approach. This time the wire \( a \) will be changed first
+          \[ (a=0, b=1, c=0) \rightarrow (a=1, b=1, c=0). \]
+As before the =and-gate= inserts an action to be run after =and-gate-delay= time with input to the =logical-gate= \( (a=1, b=1) \). Next we change \( b \)
+          \[ (a=1, b=1, c=0) \rightarrow (a=1, b=0, c=0), \]
+with the =and-gate= inserting an action to be run with input to the =logical-gate= \( (a=1, b=0) \). But now, because of our chosen last in, first out approach, we will process the last action added by the =and-gate= first. Hence
+                   \[ (a=1, b=0) \rightarrow c=0, \]
+and then we process the first inserted
+                   \[ (a=1, b=1) \rightarrow c=1. \]
+So the final state will be \( (a=1, b=0, c=1) \) which is incorrect.
+\newpage
