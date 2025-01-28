@@ -1080,14 +1080,14 @@ Another way to construct an =or-gate= is as a compound digital logic device, bui
 gate-delay and inverter-delay?
 #+end_quote
 Let's see what happens to the truth table if we invert the inputs to a logical-and.
-|---+---+---------+---------+-----------------------|
-| p | q | \lnot p | \lnot q | \lnot p \land \lnot q |
-|---+---+---------+---------+-----------------------|
-| 1 | 1 |       0 |       0 |                     0 |
-| 1 | 0 |       0 |       1 |                     0 |
-| 0 | 1 |       1 |       0 |                     0 |
-| 0 | 0 |       1 |       1 |                     1 |
-|---+---+---------+---------+-----------------------|
+|-----+-----+-----------+-----------+-------------------------|
+| $p$ | $q$ | $\lnot p$ | $\lnot q$ | $\lnot p \land \lnot q$ |
+|-----+-----+-----------+-----------+-------------------------|
+|   1 |   1 |         0 |         0 |                       0 |
+|   1 |   0 |         0 |         1 |                       0 |
+|   0 |   1 |         1 |         0 |                       0 |
+|   0 |   0 |         1 |         1 |                       1 |
+|-----+-----+-----------+-----------+-------------------------|
 This is almost what we want. If we had inverted the output of \( \lnot p \land \lnot q \) we would have the truth table for a =logical-or=. Hence we can build our =or-gate= using one =and-gate= and three =inverter=.
 #+begin_src scheme
   (define (or-gate a1 a2 output)
