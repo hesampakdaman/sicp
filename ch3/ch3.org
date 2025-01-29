@@ -1054,12 +1054,14 @@ Lastly, the scheme would work sub-optimally if we had =(define memo-fib (memoize
 #+begin_quote
 Deﬁne an =or-gate= as a primitive function box. Your =or-gate= constructor should be similar to =and-gate=.
 #+end_quote
-The difference between the =and-gate= and our =or-gate= would be the amount of delay and the logical procedure that the function box uses to compute the output signal. The =logical-or= can be implemented with a simple =if=-conditional.
+The difference between the =and-gate= and our =or-gate= would be the amount of delay and the logical procedure that the function box uses to compute the output signal. We define =logical-or= in similar fashion as the =logical-and=
 #+begin_src scheme
   (define (logical-or s t)
-    (if (and (= s 0) (= t 0)) 0 1))
+    (cond ((= s 0) t)
+          ((= t 0) s)
+          (else 1)))
 #+end_src
-We will use this procedure to implement our primitive function box
+\noindent We will use this procedure to implement our primitive function box
 #+begin_src scheme
   (define (or-gate a1 a2 output)
     (define (or-action-procedure)
