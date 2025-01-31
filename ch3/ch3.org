@@ -522,7 +522,7 @@ For the last case we simply let =z= to be a cycle using the =make-cycle= procedu
 #+begin_quote
 Devise a correct version of the count-pairs procedure of =Exercise 3.16= that returns the number of distinct pairs in any structure. (Hint: Traverse the structure, maintaining an auxiliary data structure that is used to keep track of which pairs have already been counted.)
 #+end_quote
-We will implement a set data structure, admittedly ineffienct. We will use the =memq= procedure to check if an element is in the set and =cons= to add the element to the set. The number of pairs will be the length of our set.
+We will implement a set data structure, admittedly ineffienct. We will use the =memq= procedure to check if an element is in the set and =cons= to add the element to the set. This works because =memq= uses =eq?= under the hood which checks equality by pointers. The number of pairs will be the length of our set.
 #+begin_src scheme
   (define (count-pairs x)
     (define seen-pair '())
