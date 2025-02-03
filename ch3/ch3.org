@@ -1188,3 +1188,18 @@ If we process the agenda first-in, first out the last action in the agenda is =(
 On the other hand, if we process the agenda last-in, first-out the then the last action executed will be =(logical-and 1 1)= which sets the final state incorrectly to =(a=1, b=1, c=1)=.
 
 \newpage
+
+*** Exercise 3.33
+#+begin_quote
+Using primitive =multiplier=, =adder=, and =constant= constraints, deﬁne a procedure =averager= that takes three connectors =a=, =b=, and =c= as inputs and establishes the constraint that the value of =c= is the average of the values of =a= and =b=.
+#+end_quote
+We will need to create two additional internal connectors to wire the primitives together to build averager.
+#+begin_src scheme
+  (define (averager a b c)
+    (let ((sum (make-connector))
+          (const (make-connector)))
+      (adder a b sum)
+      (constant 0.5 const)
+      (multiplier sum const c)))
+#+end_src
+\newpage
