@@ -1203,3 +1203,27 @@ We will need to create two additional internal connectors to wire the primitives
       (multiplier sum const c)))
 #+end_src
 \newpage
+
+*** Exercise 3.34
+#+begin_quote
+Louis Reasoner wants to build a =squarer=, a constraint device with two terminals such that the value of connector =b= on the second terminal will always be the square of the value =a= on the ﬁrst terminal. He proposes the following simple device made from a =multiplier=:
+
+#+begin_src scheme
+  (define (squarer a b)
+    (multiplier a a b))
+#+end_src
+There is a serious ﬂaw in this idea. Explain.
+#+end_quote
+Suppose connetor =a= has no value and we set connector =b= to 25. Since the relation is a square, we expect the system to
+give us the value of 5 for connector =a=. However, this does not happen. To understand this let's take a look at the =cond= of =mulitiplier=.
+#+begin_src scheme
+  (cond ((or (and (has-value? m1) (= (get-value m1) 0))
+             (and (has-value? m2) (= (get-value m2) 0)))
+         ...)
+        ((and (has-value? m1) (has-value? m2)) ...)
+        ((and (has-value? product) (has-value? m1)) ...
+        ((and (has-value? product) (has-value? m2)) ...)
+#+end_src
+Here =product= has a value but none of =m1= nor =m2= have. So no case in =cond= applies and =process-new-value= simply does nothing.
+
+\newpage
