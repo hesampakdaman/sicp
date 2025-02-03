@@ -1214,7 +1214,7 @@ Louis Reasoner wants to build a =squarer=, a constraint device with two terminal
 #+end_src
 There is a serious ﬂaw in this idea. Explain.
 #+end_quote
-Suppose connetor =a= has no value and we set connector =b= to 25. Since the relation is a square, we expect the system to
+Suppose connector =a= has no value and we set connector =b= to 25. Since the relation is a square, we expect the system to
 give us the value of 5 for connector =a=. However, this does not happen. To understand this let's take a look at the =cond= of =mulitiplier=.
 #+begin_src scheme
   (cond ((or (and (has-value? m1) (= (get-value m1) 0))
@@ -1224,6 +1224,7 @@ give us the value of 5 for connector =a=. However, this does not happen. To unde
         ((and (has-value? product) (has-value? m1)) ...
         ((and (has-value? product) (has-value? m2)) ...)
 #+end_src
-Here =product= has a value but none of =m1= nor =m2= have. So no case in =cond= applies and =process-new-value= simply does nothing.
+\noindent Here =product= has a value but none of =m1= nor =m2= have. So no case in =cond= applies and =process-new-value= simply does nothing.
 
 \newpage
+
