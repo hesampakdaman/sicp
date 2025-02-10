@@ -1248,7 +1248,7 @@ Ben Bitdiddle tells Louis that one way to avoid the trouble in Exercise 3.34 is 
 #+end_src
 #+end_quote
 
-\noindent In case we have a value for connector =b=, then we need to set the value of connector =a= to the square root of =b=. On the other hand, if there's a value for =a= then we set the value of =b= to the square of =a=. The rest of the procedure is very similiar to the other primitives we have already seen like =adder=.
+\noindent In case we have a value for connector =b=, then we need to set the value of connector =a= to the square root of =b=. On the other hand, if there's a value for =a= then we set the value of =b= to the square of =a=. The rest of the procedure is very similar to the other primitives we have already seen like =adder=.
 #+begin_src scheme
   (define (squarer a b)
     (define (process-new-value)
@@ -1270,3 +1270,62 @@ Ben Bitdiddle tells Louis that one way to avoid the trouble in Exercise 3.34 is 
     (connect b me)
     me)
 #+end_src
+\newpage
+
+*** Exercise 3.37
+#+begin_quote
+Exercise 3.37: The celsius-fahrenheit-converter procedure is cumbersome when compared with a more expression-oriented style of deﬁnition, such as
+
+#+begin_src scheme
+  (define (celsius-fahrenheit-converter x)
+    (c+ (c* (c/ (cv 9) (cv 5))
+            x)
+        (cv 32)))
+  (define C (make-connector))
+  (define F (celsius-fahrenheit-converter C))
+#+end_src
+
+\noindent Here =c+, c*=, etc. are the “constraint” versions of the arithmetic operations. For example, =c+= takes two connectors as arguments and returns a connector that is related to these by an adder constraint:
+
+#+begin_src scheme
+  (define (c+ x y)
+    (let ((z (make-connector)))
+      (adder x y z)
+      z))
+#+end_src
+
+\noindent Deﬁne analogous procedures =c-, c*, c/=, and =cv= (constant value) that enable us to deﬁne compound constraints as in the converter example above.
+#+end_quote
+
+\noindent We can define =cv= in terms of =constant= which is already supplied to us.
+
+#+begin_src scheme
+  (define (cv value)
+    (let ((x (make-connector)))
+      (constant value x)
+      x))
+#+end_src
+
+\noindent Similarly, we can use =multiplier= to define =c/= by noticing that if \( x / y = z\) then \( x = zy \) whenever \( y \neq 0 \)
+
+#+begin_src scheme
+  (define (c/ x y)
+    (let ((z (make-connector)))
+      (multiplier y z x)
+      z))
+#+end_src
+
+\noindent Do note however, that setting the denominator to =x= to 0 is undefined. Doing so in the current implementation will not give us a nice error message.
+
+#+begin_src scheme
+  (define x (make-connector))
+  (define y (make-connector))
+  (define z (c/ x y))
+  (probe "ratio" z)
+  (set-value! x 1 'user)
+  (set-value! y 0 'user)                  ; ERROR: Contradiction (1 0)
+#+end_src
+
+\noindent To get better error messages we need to define division as a primitive similar to how =multiplier= is defined in the book. In one of the =conds= we check if =b= is =zero= and error if so. We don't show this implementation here since it is very similar to =multiper= in the book.
+
+\newpage
