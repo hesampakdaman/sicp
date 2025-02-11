@@ -1306,7 +1306,23 @@ Exercise 3.37: The =celsius-fahrenheit-converter= procedure is cumbersome when c
       x))
 #+end_src
 
-\noindent Similarly, we can use =multiplier= to define =c/= by noticing that if \( x / y = z\) then \( x = zy \) whenever \( y \neq 0 \)
+\noindent If we are a little clever we can define =c-= in terms of =adder=. If \( x - y = z\) then we have that \( x = y + z\), therefore
+#+begin_src scheme
+  (define (c- x y)
+    (let ((z (make-connector)))
+      (adder y z x)
+      z))
+#+end_src
+
+\noindent Multiplication is straight-forward with the use of =multiplier=.
+#+begin_src scheme
+  (define (c* x y)
+    (let ((z (make-connector)))
+      (multiplier x y z)
+      z))
+#+end_src
+
+\noindent By noticing that if \( x / y = z\) then \( x = zy \) whenever \( y \neq 0 \), we can define =c\= in terms of =multiplier=
 
 #+begin_src scheme
   (define (c/ x y)
