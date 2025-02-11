@@ -1326,6 +1326,6 @@ Exercise 3.37: The celsius-fahrenheit-converter procedure is cumbersome when com
   (set-value! y 0 'user)                  ; ERROR: Contradiction (1 0)
 #+end_src
 
-\noindent To get better error messages we need to define division as a primitive similar to how =multiplier= is defined in the book. In one of the =conds= we check if =b= is =zero= and error if so. We don't show this implementation here since it is very similar to =multiper= in the book.
+\noindent To get better error messages we need to define division as a primitive similar to how =multiplier= is defined in the book. In one of the =conds= we check if =b= is =zero= and error if so. We don't show this implementation here since it is very similar to =multiplier= in the book.
 
 \newpage
