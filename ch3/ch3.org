@@ -1274,7 +1274,7 @@ Ben Bitdiddle tells Louis that one way to avoid the trouble in Exercise 3.34 is 
 
 *** Exercise 3.37
 #+begin_quote
-Exercise 3.37: The celsius-fahrenheit-converter procedure is cumbersome when compared with a more expression-oriented style of deﬁnition, such as
+Exercise 3.37: The =celsius-fahrenheit-converter= procedure is cumbersome when compared with a more expression-oriented style of deﬁnition, such as
 
 #+begin_src scheme
   (define (celsius-fahrenheit-converter x)
