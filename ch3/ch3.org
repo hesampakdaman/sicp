@@ -1315,7 +1315,7 @@ Exercise 3.37: The =celsius-fahrenheit-converter= procedure is cumbersome when c
       z))
 #+end_src
 
-\noindent Do note however, that setting the denominator to =x= to 0 is undefined. Doing so in the current implementation will not give us a nice error message.
+\noindent Do note however, that setting the denominator =y= to 0 is undefined. Doing so in the current implementation will not give us a nice error message.
 
 #+begin_src scheme
   (define x (make-connector))
