@@ -1370,3 +1370,23 @@ a. If we assume the banking system imposes the transactions to occur in some seq
 [[../images/ch3/ex-3.38/transaction.png]]
 
 \newpage
+
+*** Exercise 3.39
+#+begin_quote
+Which of the ﬁve possibilities in the parallel execution shown above remain if we instead serialize execution as follows:
+#+begin_src scheme
+  (define x 10)
+  (define s (make-serializer))
+  (parallel-execute
+   (lambda () (set! x ((s (lambda () (* x x))))))
+   (s (lambda () (set! x (+ x 1)))))
+#+end_src
+#+end_quote
+
+In =parallel-execute= only =(lambda () (* x x))= and =(set! x (+ x 1))= are serialized. These two cannot be interleaved, they can however be run in any order. Hence, out of the possible five values these three remain:
+
+- 101: P1 sets \( x \) to 100 and then P2 increments \( x \) to 101.
+- 121: P2 increments \( x \) to 11 and then P1 sets \( x \) to \( x \cdot x \).
+- 100: P1 calculates \( x \cdot x = 100\), then P2 sets \( x \) to 11, then P1 sets \( x \) to 100.
+
+\newpage
