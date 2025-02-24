@@ -1345,3 +1345,28 @@ Exercise 3.37: The =celsius-fahrenheit-converter= procedure is cumbersome when c
 \noindent To get better error messages we need to define division as a primitive similar to how =multiplier= is defined in the book. In one of the =conds= we check if =b= is =zero= and error if so. We don't show this implementation here since it is very similar to =multiplier= in the book.
 
 \newpage
+
+*** Exercise 3.38
+#+begin_quote
+Suppose that Peter, Paul, and Mary share a joint bank account that initially contains $100. Concurrently, Peter deposits $10, Paul withdraws $20, and Mary withdraws half the money in the account, by executing the following commands:
+#+begin_src scheme
+  (set! balance (+ balance 10))            ; Peter
+  (set! balance (- balance 20))            ; Paul
+  (set! balance (- balance (/ balance 2))) ; Mary
+#+end_src
+a. List all the different possible values for balance after these three transactions have been completed, assuming that the banking system forces the three processes to run sequentially in some order.
+
+b. What are some other values that could be produced if the system allows the processes to be interleaved? Draw timing diagrams like the one in Figure 3.29 to explain how these values can occur.
+#+end_quote
+a. If we assume the banking system imposes the transactions to occur in some sequential order, then we have 6 possible combinations to consider:
+- \( \$100 \rightarrow \$110 \rightarrow \$90 \rightarrow \$45 \)
+- \( \$100 \rightarrow \$110 \rightarrow \$55 \rightarrow \$35 \)
+- \( \$100 \rightarrow \$80  \rightarrow \$90 \rightarrow \$45 \)
+- \( \$100 \rightarrow \$80  \rightarrow \$40 \rightarrow \$50 \)
+- \( \$100 \rightarrow \$50  \rightarrow \$60 \rightarrow \$40 \)
+- \( \$100 \rightarrow \$50  \rightarrow \$30 \rightarrow \$40 \)
+
+\noindent b. We draw a diagram to show a possible value that the system could produce if the transactions are allowed to interleave.
+[[../images/ch3/ex-3.38/transaction.png]]
+
+\newpage
