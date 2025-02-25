@@ -1385,8 +1385,41 @@ Which of the ﬁve possibilities in the parallel execution shown above remain if
 
 In =parallel-execute= only =(lambda () (* x x))= and =(set! x (+ x 1))= are serialized. These two cannot be interleaved, they can however be run in any order. Hence, out of the possible five values these three remain:
 
-- 101: P1 sets \( x \) to 100 and then P2 increments \( x \) to 101.
-- 121: P2 increments \( x \) to 11 and then P1 sets \( x \) to \( x \cdot x \).
-- 100: P1 calculates \( x \cdot x = 100\), then P2 sets \( x \) to 11, then P1 sets \( x \) to 100.
+- 101: \( P_1 \) sets \( x \) to 100 and then \( P_2 \) increments \( x \) to 101.
+- 121: \( P_2 \) increments \( x \) to 11 and then \( P_1 \) sets \( x \) to \( x \cdot x \).
+- 100: \( P_1 \) calculates \( x \cdot x = 100\), then \( P_2 \) sets \( x \) to 11, then \( P_1 \) sets \( x \) to 100.
+
+\newpage
+
+*** Exercise 3.40
+#+begin_quote
+Give all possible values of x that can result from executing
+#+begin_src scheme
+  (define x 10)
+  (parallel-execute (lambda () (set! x (* x x)))
+                    (lambda () (set! x (* x x x))))
+#+end_src
+Which of these possibilities remain if we instead use serialized procedures:
+#+begin_src scheme
+  (define x 10)
+  (define s (make-serializer))
+  (parallel-execute (s (lambda () (set! x (* x x))))
+                    (s (lambda () (set! x (* x x x)))))
+#+end_src
+#+end_quote
+\noindent Without using a serializer the possible sequences are:
+
+- 10^6: \( P_1 \) sets \( x \) to 100 and then \( P_2 \) sets \( x \) to \( x^3 \).
+- 10^6: \( P_2 \) sets \( x \) to 10^3 and then \( P_1 \) sets \( x \) to \( x \cdot x \).
+- 10^4: \( P_1 \) accesses \( x \) (once), then \( P_2 \) sets \( x \) to 10^3, then \( P_1 \) sets \( x \).
+- 10^2: \( P_1 \) accesses \( x \) (twice), then \( P_2 \) sets \( x \) to 10^3, then \( P_1 \) sets \( x \).
+- 10^5: \( P_2 \) accesses \( x \) (once), then \( P_1 \) sets \( x \) to 10^2, then \( P_2 \) sets \( x \).
+- 10^4: \( P_2 \) accesses \( x \) (twice), then \( P_1 \) sets \( x \) to 10^2, then \( P_2 \) sets \( x \).
+- 10^3: \( P_2 \) accesses \( x \) (thrice), then \( P_1 \) sets \( x \) to 10^2, then \( P_2 \) sets \( x \).
+
+\noindent Making use of the serializer the two calculations cannot be interleaved leaving only the possible sequence:
+
+- 10^6: \( P_1 \) sets \( x \) to 100 and then \( P_2 \) sets \( x \) to \( x^3 \).
+- 10^6: \( P_2 \) sets \( x \) to 10^3 and then \( P_1 \) sets \( x \) to \( x \cdot x \).
 
 \newpage
