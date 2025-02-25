@@ -1423,3 +1423,41 @@ Which of these possibilities remain if we instead use serialized procedures:
 - 10^6: \( P_2 \) sets \( x \) to 10^3 and then \( P_1 \) sets \( x \) to \( x \cdot x \).
 
 \newpage
+
+*** Exercise 3.41
+#+begin_quote
+Ben Bitdiddle worries that it would be better to implement the bank account as follows (where the commented line has been changed):
+#+begin_src scheme
+  (define (make-account balance)
+    (define (withdraw amount)
+      (if (>= balance amount)
+          (begin (set! balance
+                       (- balance amount))
+                 balance)
+          "Insufficient funds"))
+    (define (deposit amount)
+      (set! balance (+ balance amount))
+      balance)
+    (let ((protected (make-serializer)))
+      (define (dispatch m)
+        (cond ((eq? m 'withdraw) (protected withdraw))
+              ((eq? m 'deposit) (protected deposit))
+              ((eq? m 'balance)
+               ((protected
+                 (lambda () balance)))) ; serialized
+              (else
+               (error "Unknown request: MAKE-ACCOUNT"
+                      m))))
+      dispatch))
+#+end_src
+because allowing unserialized access to the bank balance can result in anomalous behavior. Do you agree? Is there any scenario that demonstrates Ben’s concern?
+#+end_quote
+The balance of the account will be conserved because both =withdraw= and =deposit= procedures are serialized. However, if the =balance= procedure is not serialized, then reading an account's balance can be non-deterministic. In particular, consider the following set of events
+#+begin_src scheme
+  (define account (make-account 100))
+  (parallel-execute (lambda () ((account 'withdraw) 50))
+                    (lambda () (display (account 'balance))))
+#+end_src
+\noindent Depending on the order of execution of the procedures \(P_{1}\) and \(P_{2}\), the displayed account balance  is either 50 or 100. In this scenario, reading the account's balance can result in anomalous behavior.
+
+\newpage
